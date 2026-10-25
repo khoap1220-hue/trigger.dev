@@ -6,6 +6,7 @@ import { findEnvironmentBySlug } from "~/models/runtimeEnvironment.server";
 import { logger } from "~/services/logger.server";
 import { dashboardAction } from "~/services/routeBuilders/dashboardBuilder";
 import { EnvironmentParamSchema } from "~/utils/pathBuilder";
+import { isBillingConfigured } from "~/services/platform.v3.server";
 import { deploymentOnboardingEnabled } from "~/v3/services/deploymentOnboardingEnabled.server";
 import { BranchTrackingConfigSchema, getTrackedBranchForEnvironment } from "~/v3/github";
 import { TriggerDeployNowService } from "~/v3/services/triggerDeployNow.server";
@@ -40,7 +41,7 @@ export const action = dashboardAction(
 
     // Feature-flag gate: the button is hidden when off, but the action is the
     // real security boundary.
-    if (!(await deploymentOnboardingEnabled(project.organizationId))) {
+    if (!isBillingConfigured() || !(await deploymentOnboardingEnabled(project.organizationId))) {
       return json({ ok: false, error: "Not available" }, { status: 403 });
     }
 

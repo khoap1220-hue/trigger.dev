@@ -2,6 +2,7 @@ import { type PrismaClient } from "@trigger.dev/database";
 import { prisma } from "~/db.server";
 import { BranchTrackingConfigSchema } from "~/v3/github";
 import { env } from "~/env.server";
+import { isBillingConfigured } from "~/services/platform.v3.server";
 import { findProjectBySlug } from "~/models/project.server";
 import { err, fromPromise, ok, ResultAsync } from "neverthrow";
 import { BuildSettingsSchema } from "~/v3/buildSettings";
@@ -14,7 +15,7 @@ export class ProjectSettingsPresenter {
   }
 
   getProjectSettings(organizationSlug: string, projectSlug: string, userId: string) {
-    const githubAppEnabled = env.GITHUB_APP_ENABLED === "1";
+    const githubAppEnabled = env.GITHUB_APP_ENABLED === "1" && isBillingConfigured();
 
     const getProject = () =>
       fromPromise(findProjectBySlug(organizationSlug, projectSlug, userId), (error) => ({
